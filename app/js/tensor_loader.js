@@ -50,24 +50,21 @@ modelget().then((result) =>
 
                                         for(let i = 2; i < result.length-1; i++)
                                         {
+                                                let single_array = [];
+                                                single_array[0] = [];
 
-                                            let single_array = [];
-                                            single_array[0] = [];
+                                                        for(let k=0; k<3; k++)
+                                                        {     
+                                                            let [time, open, high, low, close, volume, closeTime, assetVolume, trades, buyBaseVolume, buyAssetVolume, ignored] = result[i-k];
 
-                                        for(let k=0; k<3; k++)
-                                        {
-                                                
-                                            let [time, open, high, low, close, volume, closeTime, assetVolume, trades, buyBaseVolume, buyAssetVolume, ignored] = result[i-k];
-
-                                            single_array[0].push(open,high,low,close,volume,trades,buyBaseVolume);
-                                        }
-
-                                            ticker_array[i-2] = single_array[0];
+                                                            single_array[0].push(open,high,low,close,volume,trades,buyBaseVolume);
+                                                        }
+                                                ticker_array[i-2] = single_array[0];
                                         }
 
                                         for(let i = 3; i < result.length; i++)
                                         {
-                                            final_array[i-3] = result[i][1];
+                                            final_array[i-3] = result[i][4]; // Close Price
                                         }
 
 

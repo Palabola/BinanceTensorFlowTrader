@@ -23,9 +23,6 @@ function createWindow () {
     mainWindow = null
   })
 
-    process.shit = '12312312';
-
-
 }
 
 // This method will be called when Electron has finished
