@@ -36,6 +36,8 @@ build/Release
 node_modules/
 jspm_packages/
 
+binance-tensorflow-sandbox-win32-x64/
+
 # TypeScript v1 declaration files
 typings/
 
