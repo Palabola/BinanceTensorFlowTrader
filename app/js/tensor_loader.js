@@ -5,7 +5,7 @@ async function apiget(fresh = 0)
 
     if(fresh == 1)
     {
-      json = json.slice(json.length-300,json.length);
+      json = json.slice(json.length-100,json.length);
     }
 
     return json;
@@ -41,8 +41,6 @@ modelget().then((result) =>
             {
 
                 apiget(1).then((result) => {
-
-                                console.log(result);
 
                                 let ticker_array = [];
 
@@ -90,8 +88,6 @@ modelget().then((result) =>
 
                                         train(tickets,final_price,2).then(() => {
 
-                                            console.log(input[input.length-1]);
-
                                             const tester = tf.tensor2d(
                                                 [input[input.length-1]]
                                             );
@@ -109,8 +105,6 @@ modelget().then((result) =>
                             });
 
 
-                            console.log('Continous sync');
-
                             setTimeout(production,5000);
 
                 }
@@ -127,8 +121,8 @@ modelget().then((result) =>
                             }
 
                             const response = await model.fit(input_ts, output_ts, loop)
-                            console.log(response.history.loss[0]);
-                            console.log(tf.memory());
+                            console.log('Train loss difficulty:',response.history.loss[0]);
+                            //console.log(tf.memory());
 
                         }
                     }
