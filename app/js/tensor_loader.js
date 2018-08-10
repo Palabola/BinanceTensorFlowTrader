@@ -3,11 +3,6 @@ async function apiget(fresh = 0)
 {
     json = ai_trader.btc;
 
-    if(fresh == 1)
-    {
-      json = json.slice(json.length-100,json.length);
-    }
-
     return json;
 }
 
@@ -18,6 +13,8 @@ async function modelget()
 
     return model;
 }
+
+
 
 modelget().then((result) => 
 {
@@ -37,37 +34,17 @@ modelget().then((result) =>
 
         // LOAD MODEL!   
 
-            function real_time_tensor(callback)
+            function real_time_tensor(limit,callback)
             {
 
-                apiget(1).then((result) => {
+               apiget(1).then((result) => {
 
-                                let ticker_array = [];
+                console.log(result);
 
-                                let final_array = [];
+                         result = converter.candle_convert(result,limit); 
 
-                                        for(let i = 2; i < result.length-1; i++)
-                                        {
-                                                let single_array = [];
-                                                single_array[0] = [];
-
-                                                        for(let k=0; k<3; k++)
-                                                        {     
-                                                            let [time, open, high, low, close, volume, closeTime, assetVolume, trades, buyBaseVolume, buyAssetVolume, ignored] = result[i-k];
-
-                                                            single_array[0].push(open,high,low,close,volume,trades,buyBaseVolume);
-                                                        }
-                                                ticker_array[i-2] = single_array[0];
-                                        }
-
-                                        for(let i = 3; i < result.length; i++)
-                                        {
-                                            final_array[i-3] = result[i][4]; // Close Price
-                                        }
-
-
-                                return  callback(ticker_array,final_array);
-                                    });
+                         return callback(result.input,result.output);
+                });
             }
 
 
@@ -75,7 +52,7 @@ modelget().then((result) =>
                 function production()
                 {
 
-                        real_time_tensor((input,output) =>{
+                        real_time_tensor(100,(input,output) =>{
 
                                         let tickets = tf.tensor(
                                             input
@@ -86,7 +63,7 @@ modelget().then((result) =>
                                         );
 
 
-                                        train(tickets,final_price,2).then(() => {
+                                        train(tickets,final_price,20).then(() => {
 
                                             const tester = tf.tensor2d(
                                                 [input[input.length-1]]
@@ -96,16 +73,16 @@ modelget().then((result) =>
 
                                             predict_value = outputs.dataSync()[0];
 
-                                            console.log(predict_value);
-
                                             last_predict(predict_value);
+
+                                            last_realprice(output[output.length-1]);
 
                                         });
 
                             });
 
 
-                            setTimeout(production,5000);
+                            setTimeout(production,55000);
 
                 }
 
@@ -120,14 +97,14 @@ modelget().then((result) =>
                             batchSize: 128
                             }
 
-                            const response = await model.fit(input_ts, output_ts, loop)
+                            const response = await model.fit(input_ts, output_ts, loop);
                             console.log('Train loss difficulty:',response.history.loss[0]);
                             //console.log(tf.memory());
 
                         }
                     }
                     
-    setTimeout(production,10000);            
+    setTimeout(production,1000);            
 
 });
 

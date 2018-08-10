@@ -16,21 +16,45 @@ const binance = require('node-binance-api')().options({
   ai_trader = {};
   ai_trader.btc = [];
 
-handle_gardening_candle({limit: 500});
+
+if(db.has('btc_1m').value() && ai_trader.btc.length==0)
+    {
+        ai_trader.btc =  db.get('btc_1m').value();
+
+        console.log(ai_trader.btc);
+
+        if(!data_integrity(ai_trader.btc))
+        {
+            ai_trader.btc = []; 
+            setTimeout(handle_gardening_candle,500,({limit: 500}));
+        }
+        else
+        {
+            setTimeout(handle_gardening_candle,500,({limit: 100}));     
+        }
+
+        console.log('Low DB connected and loaded!');
+    }
+
+function data_integrity(data)
+{
+            for(let i=0; i < data.length-1; i++)
+            { 
+                    if(data[i+1][0] - data[i][0] != 60000)
+                    {
+                        console.log('Data corrupted at:',i,data[i+1][0],data[i][0]);
+                        return false; // Data corrupted!   
+                    }   
+            }
+
+        return true;       
+}
 
 
 function handle_gardening_candle(config)
 {
 
-            if(db.has('btc_1m').value() && ai_trader.btc.length==0)
-            {
-                ai_trader.btc =  db.get('btc_1m').value();
-
-                console.log('Low DB connected and loaded!');
-            }
-
-
-                binance.candlesticks("BTCUSDT", "1m", (error, ticks, symbol) => {
+        binance.candlesticks("BTCUSDT", "1m", (error, ticks, symbol) => {
                // console.log("candlesticks()", ticks);
                 let last_tick = ticks[ticks.length - 1];
 
@@ -52,10 +76,15 @@ function handle_gardening_candle(config)
                                         }
                                     }
 
-    
                                 db.set('btc_1m', ai_trader.btc).write();    
 
-                                setTimeout(handle_gardening_candle,5000,({limit: 10}));    
+                                        if(!data_integrity(ai_trader.btc))
+                                        {
+                                            ai_trader.btc = []; 
+                                            setTimeout(handle_gardening_candle,500,({limit: 500}));
+                                        }
+
+                                setTimeout(handle_gardening_candle,15000,({limit: 10}));    
 
                                 return;
                             }
@@ -65,6 +94,8 @@ function handle_gardening_candle(config)
                           if(config.limit == 500 && ai_trader.btc[0][0] != ticks[0][0])
                           {
                                   
+                              console.log(ai_trader.btc);
+
                               if(ai_trader.btc.length > 2000) // LIMIT OF HISROTY!
                               {
                                 setTimeout(handle_gardening_candle,15000,({limit: 10}));
@@ -73,13 +104,13 @@ function handle_gardening_candle(config)
 
                               ai_trader.btc = ticks.concat(ai_trader.btc); 
 
-                              setTimeout(handle_gardening_candle,1000,({limit: 500, endTime: ticks[0][6]}));    
+                              setTimeout(handle_gardening_candle,1000,({limit: 500, endTime: ticks[0][6]-60000}));    
 
                               return;
                           }
                     
                 
-                    setTimeout(handle_gardening_candle,500,({limit: 500, endTime: ticks[0][6]}));    
+                    setTimeout(handle_gardening_candle,500,({limit: 500, endTime: ticks[0][6]-60000}));    
 
                     return;          
                         

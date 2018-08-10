@@ -8,18 +8,20 @@
   
     <link rel="stylesheet" href="./css/custom.css" >
 
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@0.12.0"> </script>
+
     <script> 
     // Load Electron things
         let $ = require("jquery"); 
-        require('./renderer.js')
+        require('./app/js/binance_api.js');
+        const converter = require('./app/js/tensor_creator.js');
+        //require('./app/js/tensor_loader.js');
+        require('./app/js/modell_creator.js');
     </script>
 
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@0.12.0"> </script>
 
     <script src="./app/js/print.js"> </script>
 
-
-    <script src="./app/js/tensor_loader.js"> </script>
 
 
   </head>
@@ -33,9 +35,20 @@
                   </div>  
                   <div class="row justify-content-md-center">
                     <div class="col-4">
+                      <h3>Predicted price:</h3>
+                    </div>
+                    <div class="col-4">
+                      <h3>Real price:</h3>
+                    </div>
+                    <div class="col-4">
                       
                     </div>
+                  </div>
+                  <div class="row justify-content-md-center">
                     <div class="col-4 result">
+                      
+                    </div>
+                    <div class="col-4 realprice">
                       
                     </div>
                     <div class="col-4">
