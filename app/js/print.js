@@ -22,7 +22,7 @@ function last_realprice (realprice)
 
 function start ()
 {
-    ts_create.start_ts();
+    TensorClass.start();
 }
 
 $(document).ready(function(){

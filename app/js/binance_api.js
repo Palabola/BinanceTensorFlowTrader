@@ -15,25 +15,24 @@ const binance = require('node-binance-api')().options({
 
   ai_trader = {};
   ai_trader.btc = [];
+  ai_trader.datasetlimit = 2000;
 
 
 if(db.has('btc_1m').value() && ai_trader.btc.length==0)
     {
         ai_trader.btc =  db.get('btc_1m').value();
 
-        console.log(ai_trader.btc);
+                if(!data_integrity(ai_trader.btc))
+                {
+                    ai_trader.btc = []; 
+                    setTimeout(handle_gardening_candle,500,({limit: 500}));
+                }
+                else
+                {
+                    setTimeout(handle_gardening_candle,500,({limit: 100}));     
+                }
 
-        if(!data_integrity(ai_trader.btc))
-        {
-            ai_trader.btc = []; 
-            setTimeout(handle_gardening_candle,500,({limit: 500}));
-        }
-        else
-        {
-            setTimeout(handle_gardening_candle,500,({limit: 100}));     
-        }
-
-        console.log('Low DB connected and loaded!');
+                TensorClass.exchange_data_set(ai_trader.btc);        
     }
 
 function data_integrity(data)
@@ -86,8 +85,6 @@ function handle_gardening_candle(config)
 
                                 data_set(ai_trader.btc.length);        
 
-                                setTimeout(handle_gardening_candle,15000,({limit: 10}));    
-
                                 return;
                             }
 
@@ -96,17 +93,14 @@ function handle_gardening_candle(config)
                           if(config.limit == 500 && ai_trader.btc[0][0] != ticks[0][0])
                           {
                                   
-                              console.log(ai_trader.btc);
-
-                              if(ai_trader.btc.length > 2000) // LIMIT OF HISROTY!
+                              if(ai_trader.btc.length >= ai_trader.datasetlimit) // LIMIT OF HISROTY!
                               {
-                                setTimeout(handle_gardening_candle,15000,({limit: 10}));
                                 return;
                               }  
 
                               ai_trader.btc = ticks.concat(ai_trader.btc); 
 
-                              setTimeout(handle_gardening_candle,1000,({limit: 500, endTime: ticks[0][6]-60000}));    
+                              setTimeout(handle_gardening_candle,500,({limit: 500, endTime: ticks[0][6]-60000}));    
 
                               return;
                           }
@@ -118,10 +112,27 @@ function handle_gardening_candle(config)
                         
                 
                 }, config);
-
-
-                
+               
 }
 
+
+binance.websockets.candlesticks(['BTCUSDT'], "1m", (candlesticks) => {
+    let { e:eventType, E:eventTime, s:symbol, k:ticks } = candlesticks;
+    let { o:open, h:high, l:low, c:close, v:volume, n:trades, i:interval, x:isFinal, q:quoteVolume, V:buyVolume, Q:quoteBuyVolume } = ticks;
+
+                if(isFinal)
+                {
+                    if(ai_trader.btc.length >= ai_trader.datasetlimit) 
+                    {
+                        console.log('Update by Websocket!');
+                        handle_gardening_candle({limit: 100});  
+                        TensorClass.exchange_data_set(ai_trader.btc);
+                        TensorClass.update_and_train();
+
+                        last_realprice(close);
+                    }
+                }
+
+  });
 
 
