@@ -1,6 +1,6 @@
 
 
-class Ganit{
+class TENSOR_API{
 
 	constructor() {
 		this.model = tf.sequential();
@@ -13,13 +13,31 @@ class Ganit{
         this.loss = tf.losses.meanSquaredError;
         this.pre_train_loop = 5;
         this.pre_train_loop = 5;
+        this.last_predict = 0;
+        this.predict = [];
+        this.real_price = [];
     }
 
+predict_get() 
+{
+    return this.predict;
+}   
+
+real_price_set(value) 
+{
+    this.real_price.push(value)
+}   
+
+real_price_get()
+{
+    return this.real_price;
+}   
+
 exchange_data_set(exchange_data) 
-    {
-        this.exchange_data = exchange_data;
-        return;
-    }
+{
+    this.exchange_data = exchange_data;
+    return;
+}
 
 exchange_data_get() 
 {
@@ -152,7 +170,7 @@ candle_convert(size = 0)
     }
 
 
-    update_and_train()
+  async update_and_train()
     {
         if(this.status !== 1)
         {
@@ -168,10 +186,12 @@ candle_convert(size = 0)
 
                 let predict_value = outputs.dataSync()[0];
 
-                last_predict(predict_value);
+                this.predict.push(predict_value);
 
-            });
+                this.last_predict = predict_value;
 
+                return;
+            });  
     }
 
 	async train(input_ts,output_ts,loop){
@@ -191,4 +211,4 @@ candle_convert(size = 0)
 
 	}
 	
-module.exports = Ganit
+module.exports = TENSOR_API

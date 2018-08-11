@@ -16,7 +16,7 @@ const binance = require('node-binance-api')().options({
   ai_trader = {};
   ai_trader.btc = [];
   ai_trader.datasetlimit = 2000;
-
+  ai_trader.update = 0;
 
 if(db.has('btc_1m').value() && ai_trader.btc.length==0)
     {
@@ -83,7 +83,9 @@ function handle_gardening_candle(config)
                                             setTimeout(handle_gardening_candle,500,({limit: 500}));
                                         }
 
-                                data_set(ai_trader.btc.length);        
+                                data_set(ai_trader.btc.length);
+                                
+                                TensorClass.exchange_data_set(ai_trader.btc);
 
                                 return;
                             }
@@ -124,14 +126,33 @@ binance.websockets.candlesticks(['BTCUSDT'], "1m", (candlesticks) => {
                 {
                     if(ai_trader.btc.length >= ai_trader.datasetlimit) 
                     {
-                        console.log('Update by Websocket!');
-                        handle_gardening_candle({limit: 100});  
-                        TensorClass.exchange_data_set(ai_trader.btc);
-                        TensorClass.update_and_train();
+                        handle_gardening_candle({limit: 100});
 
-                        last_realprice(close);
-                    }
+                        if(TensorClass.predict_get().length > 0)
+                        {
+                          TensorClass.real_price_set(close);
+                        }
+
+                        ai_trader.update = 1;
+                    }                    
                 }
+                else
+                {
+
+                   if(ai_trader.update == 1)
+                   { 
+                    TensorClass.update_and_train();  
+
+                    console.log(TensorClass.real_price_get());
+                    console.log(TensorClass.predict_get());
+
+                    ai_trader.update = 0;
+                   }
+
+                   next_predict(TensorClass.last_predict);
+
+                }
+
 
   });
 
