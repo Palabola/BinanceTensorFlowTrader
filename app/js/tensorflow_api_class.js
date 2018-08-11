@@ -11,6 +11,7 @@ class TENSOR_API{
         this.predict_tensor = {};
         this.optimizer = tf.train.adam();
         this.loss = tf.losses.meanSquaredError;
+        this.difficulty = 0;
         this.pre_train_loop = 5;
         this.pre_train_loop = 5;
         this.last_predict = 0;
@@ -205,6 +206,7 @@ candle_convert(size = 0)
     
             const response = await this.model.fit(input_ts, output_ts, loop)
             console.log(response.history.loss[0]);
+            this.difficulty = response.history.loss[0];
             }
     }
     

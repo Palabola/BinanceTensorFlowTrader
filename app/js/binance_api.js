@@ -150,6 +150,7 @@ binance.websockets.candlesticks(['BTCUSDT'], "1m", (candlesticks) => {
                    }
 
                    next_predict(TensorClass.last_predict);
+                   modell_difficulty(TensorClass.this.difficulty); // Good indicator for pump/dump!
 
                 }
 
