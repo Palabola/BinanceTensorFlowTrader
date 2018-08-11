@@ -84,6 +84,8 @@ function handle_gardening_candle(config)
                                             setTimeout(handle_gardening_candle,500,({limit: 500}));
                                         }
 
+                                data_set(ai_trader.btc.length);        
+
                                 setTimeout(handle_gardening_candle,15000,({limit: 10}));    
 
                                 return;

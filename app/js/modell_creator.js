@@ -8,19 +8,19 @@ async function apiget()
 
 
 
-            function real_time_tensor(limit,callback)
-            {
-                    apiget().then((result) => {
+function real_time_tensor(limit,callback)
+{
+        apiget().then((result) => {
 
-                                result = converter.candle_convert(result,limit); 
+                    result = converter.candle_convert(result,limit); 
 
-                                return callback(result.input,result.output);
-                        });
-            }
-
-
+                    return callback(result.input,result.output);
+            });
+}
 
 
+function start_ts ()
+{
 
 apiget().then((result) => {       
         
@@ -78,6 +78,7 @@ apiget().then((result) => {
 
                                         const response = await model.fit(input_ts, output_ts, loop)
                                         console.log(response.history.loss[0]);
+                                        modell_difficulty(response.history.loss[0]);
                                         // console.log(tf.memory());
 
                                         }
@@ -145,3 +146,7 @@ apiget().then((result) => {
 
 });
 
+}
+
+
+module.exports.start_ts = start_ts;  

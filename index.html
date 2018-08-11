@@ -16,7 +16,7 @@
         require('./app/js/binance_api.js');
         const converter = require('./app/js/tensor_creator.js');
         //require('./app/js/tensor_loader.js');
-        require('./app/js/modell_creator.js');
+        let ts_create = require('./app/js/modell_creator.js');
     </script>
 
 
@@ -34,26 +34,30 @@
                     </div>
                   </div>  
                   <div class="row justify-content-md-center">
+                      <div class="col-4">
+                      <h3>Control Panel:</h3>
+                        </div>
                     <div class="col-4">
                       <h3>Predicted price:</h3>
                     </div>
                     <div class="col-4">
                       <h3>Real price:</h3>
                     </div>
-                    <div class="col-4">
-                      
-                    </div>
                   </div>
                   <div class="row justify-content-md-center">
+                      <div class="col-4">
+                          <div class="row"> <span class="dataset">Loading...</span></div>
+                          <div class="row"> <span class="modell_diff">Loading...</span></div>
+                          <div class="row"> <button type="button" onclick="start()" class="btn btn-success">Start modell</button> </div>
+                          
+                      </div>
                     <div class="col-4 result">
                       
                     </div>
                     <div class="col-4 realprice">
                       
                     </div>
-                    <div class="col-4">
-                      
-                    </div>
+    
                   </div>
                 </div>
               </div> 

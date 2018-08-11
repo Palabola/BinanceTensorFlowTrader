@@ -1,5 +1,15 @@
 
 
+function data_set (value)
+{
+    $('.dataset').html("Available dataset: "+value);
+}
+
+function modell_difficulty (value)
+{
+    $('.modell_diff').html("Modell difficulty: "+ Math.round(value * 100) / 100);
+}
+
 function last_predict (predict)
 {
     $('.result').prepend('<h1>'+ Math.round(predict * 100) / 100+'</h1>');
@@ -10,7 +20,10 @@ function last_realprice (realprice)
     $('.realprice').prepend('<h1>'+ Math.round(realprice * 100) / 100+'</h1>');
 }
 
-
+function start ()
+{
+    ts_create.start_ts();
+}
 
 $(document).ready(function(){
 
