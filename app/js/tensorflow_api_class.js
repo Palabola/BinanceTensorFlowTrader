@@ -13,7 +13,6 @@ class TENSOR_API{
         this.loss = tf.losses.meanSquaredError;
         this.difficulty = 0;
         this.pre_train_loop = 5;
-        this.pre_train_loop = 5;
         this.last_predict = 0;
         this.predict = [];
         this.real_price = [];
@@ -23,6 +22,12 @@ predict_get()
 {
     return this.predict;
 }   
+
+async predict_set(predict) 
+{
+    this.predict.push(predict);
+    return;
+} 
 
 real_price_set(value) 
 {
@@ -34,10 +39,10 @@ real_price_get()
     return this.real_price;
 }   
 
-exchange_data_set(exchange_data) 
+async exchange_data_set(exchange_data) 
 {
     this.exchange_data = exchange_data;
-    return;
+    return this.exchange_data;
 }
 
 exchange_data_get() 
@@ -179,20 +184,27 @@ candle_convert(size = 0)
             return;
         }
 
+        await this.sleep(5000); 
+
         this.create_deeptrain_tensor();
 
-        this.train(this.deeptrain.input,this.deeptrain.output,this.pre_train_loop).then(() => {
+        await this.train(this.deeptrain.input,this.deeptrain.output,this.pre_train_loop);
 
                 let outputs = this.model.predict(this.predict_tensor);
 
                 let predict_value = outputs.dataSync()[0];
 
-                this.predict.push(predict_value);
-
                 this.last_predict = predict_value;
 
+                this.predict_set(predict_value);
+   
+                await this.sleep(500); // Be sure everything is updated
+
                 return;
-            });  
+    }
+
+    sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
     }
 
 	async train(input_ts,output_ts,loop){

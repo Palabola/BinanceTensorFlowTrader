@@ -16,9 +16,13 @@
         
         let ts_class = require('./app/js/tensorflow_api_class.js');
 
+        let binance_class = require('./app/js/binance_api_class.js');
+
         const TensorClass = new ts_class();
 
-        require('./app/js/binance_api.js');
+        const BinanceClass = new binance_class();
+
+        require("./app/js/app.js");
 
         //console.log(bela.exchange_data);
         //const converter = require('./app/js/tensor_creator.js');
