@@ -170,6 +170,11 @@ candle_convert(size = 0)
     }
     
     start(){
+        if(this.status == 1) // Already started!
+        {
+          return;  
+        }    
+
         this.create_model();
         this.create_pretain_tensor();
         this.pre_train();

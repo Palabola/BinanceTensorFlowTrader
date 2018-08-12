@@ -26,6 +26,7 @@ const binance = require('node-binance-api')().options({
         this.invertval_msec = 60000;
         this.data_lenght_min = 2000;
         this.last_update = 0;
+        this.tick_price = 0;
         // LOAD FROM LOW DB
         if(db.has(this.symbol+this.invertval).value())
         {
@@ -43,11 +44,19 @@ const binance = require('node-binance-api')().options({
             let { e:eventType, E:eventTime, s:symbol, k:ticks } = candlesticks;
             let { o:open, h:high, l:low, c:close, v:volume, n:trades, i:interval, x:isFinal, q:quoteVolume, V:buyVolume, Q:quoteBuyVolume } = ticks;
 
+             this.tick_price = close;
+             
              if(isFinal)
              {
               this.update_loop();
              }
-
+             else
+             {
+                if(this.data.length <= this.data_lenght_min)
+                    {
+                     this.update_loop();  
+                    }
+             }
           });
 
           
@@ -62,13 +71,13 @@ const binance = require('node-binance-api')().options({
         if(this.data.length <= this.data_lenght_min) // Preload phase
         {
           await this.get_preload_history(); 
+          console.log('Create history: ',this.data.length);
         }
         else
         {
           this.get_live_history(()=>{
             db.set(this.symbol+this.invertval, this.data).write(); 
             this.last_update = this.data[this.data.length-1][0];
-            console.log( this.last_update);
           });
         }
     }

@@ -28,6 +28,16 @@ function last_realprice (realprice)
     $('.realprice').prepend('<h1>'+ Math.round(realprice * 100) / 100+'</h1>');
 }
 
+function live_fields (time,price)
+{
+    time = new Date(time);
+
+    $('.time').html(time.getHours()+":"+time.getMinutes());
+    $('.current-price').html(Math.round(price * 100) / 100);
+}
+
+
+
 function start ()
 {
     TensorClass.start();

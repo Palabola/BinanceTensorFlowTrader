@@ -28,11 +28,10 @@ async function draw_loop()
         {
             next_predict(TensorClass.last_predict);
             modell_difficulty(TensorClass.difficulty);
-            console.log(TensorClass.predict_get());
-        });
-
+        }); 
     }
 
+    live_fields(BinanceClass.last_update,BinanceClass.tick_price);
     TensorClass.exchange_data_set(BinanceClass.data);
 }
 
