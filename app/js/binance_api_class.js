@@ -1,9 +1,12 @@
 // This file is required by the index.html file and will
 // be executed in the renderer process for that window.
 // All of the Node.js APIs are available in this process.
+
+const api_settings =  require('./api_keys').get_settings();
+
 const binance = require('node-binance-api')().options({
-   APIKEY: '<key>',
-   APISECRET: '<secret>',
+   APIKEY: api_settings.APIKEY,
+   APISECRET: api_settings.APISECRET,
     useServerTime: true, // If you get timestamp errors, synchronize to server time at startup
     test: true // If you want to use sandbox mode where orders are simulated
   });

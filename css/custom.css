@@ -1,2 +1,11 @@
+
+
+#chartdiv {
+    width: 100%;
+    height: 500px;
+  }
+
+body {
 -webkit-font-smoothing: subpixel-antialiased;
-text-rendering:optimizeSpeed;
+text-rendering:optimizeSpeed;  
+}

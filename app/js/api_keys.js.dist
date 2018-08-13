@@ -1,0 +1,15 @@
+
+class API_Settings {
+
+    static get_settings () {
+        let settings = {};
+
+        settings.APIKEY = ""
+        settings.APISECRET = ""
+        
+        return settings;
+    }
+
+}
+
+module.exports = API_Settings;

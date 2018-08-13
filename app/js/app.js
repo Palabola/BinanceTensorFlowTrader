@@ -6,18 +6,19 @@ BinanceClass.update_loop();
 
 window.last_update = 0;
 
+
 async function draw_loop()
 {
+    // Keep datas up to date!
+    TensorClass.exchange_data_set(BinanceClass.data);
+
 
     if(window.last_update != BinanceClass.last_update)
     {
-        console.log('Application Loop');
-
         data_set(BinanceClass.data.length);
 
         window.last_update = BinanceClass.last_update;
 
-        await TensorClass.exchange_data_set(BinanceClass.data);
 
         if(TensorClass.predict_get().length > 0)
         {
@@ -31,9 +32,15 @@ async function draw_loop()
         }); 
     }
 
-    live_fields(BinanceClass.last_update,BinanceClass.tick_price);
-    TensorClass.exchange_data_set(BinanceClass.data);
+                live_fields(BinanceClass.last_update,BinanceClass.tick_price);
+
+                if(Math.abs(TensorClass.last_predict - BinanceClass.tick_price) > 20 && TensorClass.last_predict > 0 && TensorClass.difficulty < 500)
+                {
+                    new_action(TensorClass.last_predict,BinanceClass.tick_price); 
+                }
+
 }
+
 
 
 setInterval(draw_loop, 1000);

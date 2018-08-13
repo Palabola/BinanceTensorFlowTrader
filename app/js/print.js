@@ -15,6 +15,13 @@ function last_predict (predict)
     $('.result').prepend('<h1>'+ Math.round(predict * 100) / 100+'</h1>');
 }
 
+function new_action (pred,real)
+{
+    $('.actions').prepend('<h1>Buy/Sell Pred:'+Math.round(pred * 100) / 100+' Real:'+Math.round(real * 100) / 100+'</h1>');
+}
+
+
+
 function next_predict (predict)
 {
     if(predict == 0)
