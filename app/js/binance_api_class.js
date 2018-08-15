@@ -2,15 +2,6 @@
 // be executed in the renderer process for that window.
 // All of the Node.js APIs are available in this process.
 
-const api_settings =  require('./api_keys').get_settings();
-
-const binance = require('node-binance-api')().options({
-   APIKEY: api_settings.APIKEY,
-   APISECRET: api_settings.APISECRET,
-    useServerTime: true, // If you get timestamp errors, synchronize to server time at startup
-    test: true // If you want to use sandbox mode where orders are simulated
-  });
-
   const low = require('lowdb');
   const FileSync = require('lowdb/adapters/FileSync');
   const adapter = new FileSync('db.json')
@@ -29,7 +20,9 @@ const binance = require('node-binance-api')().options({
         this.invertval_msec = 60000;
         this.data_lenght_min = 2000;
         this.last_update = 0;
-        this.tick_price = 0;
+        this.tick_data= {};
+        this.depth = {};
+        this.balances = {};
         // LOAD FROM LOW DB
         if(db.has(this.symbol+this.invertval).value())
         {
@@ -43,15 +36,15 @@ const binance = require('node-binance-api')().options({
 
     async websocket_start()
     {
-        binance.websockets.candlesticks([this.symbol], this.invertval, (candlesticks) => {
+        await binance.websockets.candlesticks([this.symbol], this.invertval, (candlesticks) => {
             let { e:eventType, E:eventTime, s:symbol, k:ticks } = candlesticks;
             let { o:open, h:high, l:low, c:close, v:volume, n:trades, i:interval, x:isFinal, q:quoteVolume, V:buyVolume, Q:quoteBuyVolume } = ticks;
 
-             this.tick_price = close;
+             this.tick_data = {open,high,low,close,volume,trades,interval,isFinal,quoteVolume,buyVolume,quoteBuyVolume};
              
              if(isFinal)
              {
-              this.update_loop();
+                    this.update_loop();
              }
              else
              {
@@ -60,9 +53,17 @@ const binance = require('node-binance-api')().options({
                      this.update_loop();  
                     }
              }
-          });
+          });  
 
-          
+          await binance.websockets.depthCache([this.symbol], (symbol, depth) => {
+            this.depth.bids  = binance.sortBids(depth.bids);
+            this.depth.asks = binance.sortAsks(depth.asks);
+           // console.log(symbol+" depth cache update");
+           // console.log("bids", this.depth.bids);
+           // console.log("asks", this.depth.asks);
+           // console.log("best bid: "+binance.first(this.depth.bids));
+          //  console.log("best ask: "+binance.first(this.depth.asks));
+          });
     }
 
 
@@ -74,15 +75,24 @@ const binance = require('node-binance-api')().options({
         if(this.data.length <= this.data_lenght_min) // Preload phase
         {
           await this.get_preload_history(); 
+            db.set(this.symbol+this.invertval, this.data).write();  
           console.log('Create history: ',this.data.length);
         }
         else
-        {
+        {     
           this.get_live_history(()=>{
             db.set(this.symbol+this.invertval, this.data).write(); 
             this.last_update = this.data[this.data.length-1][0];
           });
         }
+
+    }
+
+    async get_balance()
+    {
+        binance.balance((error, balances) => {
+            this.balances = balances;
+          });
     }
 
     async data_integrity()
@@ -123,12 +133,13 @@ const binance = require('node-binance-api')().options({
     async get_live_history(callback)
     {
         this.get_candlesticks({limit: 50},(ticks)=>{
-            for(let i=0; i < ticks.length; i++)
+            for(let i=0; i < ticks.length-1; i++) // Last tick data is corrupted!
             {
-                if(ticks[i][0] > this.data[this.data.length-1][0])
+                if(ticks[i][0] > this.data[this.data.length-1][0]) // Check time!
                 {
                     
                 this.data.push(ticks[i]);
+                
                 }
             }
             return callback();

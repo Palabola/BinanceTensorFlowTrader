@@ -18,6 +18,15 @@
 
         let binance_class = require('./app/js/binance_api_class.js');
 
+        const api_settings =  require('./app/js/api_keys').get_settings();
+
+        const binance = require('node-binance-api')().options({
+          APIKEY: api_settings.APIKEY,
+          APISECRET: api_settings.APISECRET,
+            useServerTime: true, // If you get timestamp errors, synchronize to server time at startup
+            test: false // If you want to use sandbox mode where orders are simulated
+          });
+
         const TensorClass = new ts_class();
 
         const BinanceClass = new binance_class();
@@ -81,6 +90,7 @@
                           <div class="row"> <span class="dataset">Loading...</span></div>
                           <div class="row"> <span class="modell_diff">Loading...</span></div>
                           <div class="row"> <button type="button" onclick="start()" class="btn btn-success">Start modell</button> </div>
+                          <div class="row"> <button type="button" onclick="clean_orders()" class="btn btn-warning">Clean Orders</button> </div>
                           
                       </div>
                       <div class="col-3 actions">

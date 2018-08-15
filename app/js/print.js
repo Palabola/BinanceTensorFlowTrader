@@ -44,6 +44,17 @@ function live_fields (time,price)
 }
 
 
+function clean_orders ()
+{
+
+    binance.cancelOrders("BTCUSDT", (error, response, symbol) => {
+        console.log(symbol+" cancel response:", response);
+      });
+
+}
+
+
+
 
 function start ()
 {

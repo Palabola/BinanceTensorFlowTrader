@@ -12,7 +12,8 @@ class TENSOR_API{
         this.optimizer = tf.train.adam();
         this.loss = tf.losses.meanSquaredError;
         this.difficulty = 0;
-        this.pre_train_loop = 5;
+        this.pre_train_loop = 12;
+        this.live_train_loop = 5;
         this.last_predict = 0;
         this.predict = [];
         this.real_price = [];
@@ -193,7 +194,7 @@ candle_convert(size = 0)
 
         this.create_deeptrain_tensor();
 
-        await this.train(this.deeptrain.input,this.deeptrain.output,this.pre_train_loop);
+        await this.train(this.deeptrain.input,this.deeptrain.output,this.live_train_loop);
 
                 let outputs = this.model.predict(this.predict_tensor);
 
