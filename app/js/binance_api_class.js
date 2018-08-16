@@ -23,14 +23,11 @@
         this.tick_data= {};
         this.depth = {};
         this.balances = {};
+        this.data = [];
         // LOAD FROM LOW DB
         if(db.has(this.symbol+this.invertval).value())
         {
          this.data = db.get(this.symbol+this.invertval).value();
-        }
-        else
-        {
-          this.data = [];
         }
     }
 
@@ -67,14 +64,14 @@
     }
 
 
-    async update_loop()
+    update_loop()
     {
 
-        await this.data_integrity();
+        this.data_integrity();
 
         if(this.data.length <= this.data_lenght_min) // Preload phase
         {
-          await this.get_preload_history(); 
+           this.get_preload_history(); 
             db.set(this.symbol+this.invertval, this.data).write();  
           console.log('Create history: ',this.data.length);
         }
@@ -88,6 +85,18 @@
 
     }
 
+    trend(time)
+    {
+       if(this.data[this.data.length-1][4] > this.data[this.data.length-time][4]) 
+        {
+          return 'up';  
+        }
+        else
+        {
+          return 'down';  
+        }
+    }
+
     async get_balance()
     {
         binance.balance((error, balances) => {
@@ -97,6 +106,7 @@
 
     async data_integrity()
         {
+            
             if(this.data.length==0)
                 return true;
 
@@ -125,6 +135,7 @@
        else
        {
         this.get_candlesticks({limit: 500, endTime: this.data[0][6]-60000},(ticks)=>{
+            if(ticks[ticks.length-1][0] < this.data[0][0])    // Be sure no overwrite 
             this.data = ticks.concat(this.data);
         });
        }
