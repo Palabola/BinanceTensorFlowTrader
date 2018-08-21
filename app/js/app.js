@@ -6,6 +6,8 @@ BinanceClass.update_loop();
 
 window.last_update = 0;
 
+window.loging = [];
+
 
 async function draw_loop()
 {
@@ -22,7 +24,7 @@ async function draw_loop()
         window.last_update = BinanceClass.last_update;
 
 
-        if(TensorClass.predict_get().length > 0)
+        if(TensorClass.predict.length > 0)
         {
             TensorClass.real_price_set(close);
         }
@@ -32,7 +34,29 @@ async function draw_loop()
             next_predict(TensorClass.last_predict);
             modell_difficulty(TensorClass.difficulty);
 
- 
+            let depth_bid = depth_grouper(BinanceClass.depth.bids);
+            let depth_ask = depth_grouper(BinanceClass.depth.asks);
+            depth_bid = depth_volume_predict('bid',depth_bid,BinanceClass.data[BinanceClass.data.length-1][7]),
+            depth_ask = depth_volume_predict('ask',depth_ask,BinanceClass.data[BinanceClass.data.length-1][7]),
+
+
+            window.loging.push(
+            [
+            BinanceClass.last_update/1000,
+            rounding_array(TensorClass.last_predict),
+            rounding(TensorClass.difficulty,0),
+            rounding(BinanceClass.data[BinanceClass.data.length-1][5]), // Total Volume
+            rounding(BinanceClass.data[BinanceClass.data.length-1][9]), // Buy Volume
+            depth_bid.small,
+            depth_bid.big,
+            depth_ask.small,
+            depth_ask.big
+            ]);
+
+
+            log_print(window.loging);
+            console.log(window.loging);
+
         }); 
     }
 
@@ -117,6 +141,20 @@ function rounding(value,dec = 2)
 
    return Math.round(value * coeff) / coeff;
 }
+
+function rounding_array(array,dec = 2)
+{
+        let coeff = Math.pow(10, dec);
+        let array_new = [];
+    
+        for (let i = 0; i < array.length; i++)
+        {
+            //console.log(Number(array[i]));
+            array_new[i] = Math.round(Number(array[i]) * coeff) / coeff;    
+        }
+    
+        return array_new;
+}   
 
 
 /* OLD BUY SYSTEM :) */

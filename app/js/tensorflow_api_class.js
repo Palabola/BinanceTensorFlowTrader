@@ -1,3 +1,7 @@
+const low = require('lowdb');
+const FileSync = require('lowdb/adapters/FileSync');
+const adapter = new FileSync('predict_log.json');
+const db = low(adapter);
 
 
 class TENSOR_API{
@@ -9,22 +13,19 @@ class TENSOR_API{
         this.pretain = {};
         this.deeptrain = {};
         this.predict_tensor = {};
+        this.deep_train_size = 500;
         this.optimizer = tf.train.adam();
         this.loss = tf.losses.meanSquaredError;
         this.difficulty = 0;
         this.pre_train_loop = 12;
         this.live_train_loop = 5;
-        this.last_predict = 0;
+        this.last_predict = [];
         this.predict = [];
         this.real_price = [];
     }
 
-predict_get() 
-{
-    return this.predict;
-}   
 
-async predict_set(predict) 
+predict_set(predict) 
 {
     this.predict.push(predict);
     return;
@@ -35,21 +36,12 @@ real_price_set(value)
     this.real_price.push(value)
 }   
 
-real_price_get()
-{
-    return this.real_price;
-}   
-
-async exchange_data_set(exchange_data) 
+exchange_data_set(exchange_data) 
 {
     this.exchange_data = exchange_data;
     return this.exchange_data;
 }
 
-exchange_data_get() 
-{
-    return this.exchange_data;
-}    
         
 candle_convert(size = 0)
             {
@@ -79,20 +71,21 @@ candle_convert(size = 0)
                                             single_array[0].push(open,high,low,close,volume,trades,buyBaseVolume); 
                                         }
 
-                                result.input[i-2] = single_array[0];
+                                result.input[i-2] = this.rounding_array(single_array[0]);
                         }
 
                         for(let i = 3; i < candlechart.length; i++) // Create 
                         {
-                            result.output[i-3] = candlechart[i][4]; // Close Price
+                            result.output[i-3] = this.rounding_array([candlechart[i][4],candlechart[i][2],candlechart[i][3]]); // Close High Low
                         }
-
+      
                 return result;       
             }
 
     create_model()
     {
-        this.model.add(tf.layers.dense({
+        
+      this.model.add(tf.layers.dense({
             units: 21,
             inputShape: [21],
             activation: 'elu',
@@ -112,7 +105,7 @@ candle_convert(size = 0)
 
 
         this.model.add( tf.layers.dense({
-            units: 1,
+            units: 3,
             activation: 'elu',
         }));
 
@@ -144,7 +137,7 @@ candle_convert(size = 0)
 
     create_deeptrain_tensor(){
 
-        let result = this.candle_convert(100); 
+        let result = this.candle_convert(this.deep_train_size); 
 
         this.deeptrain.input = tf.tensor(
             result.input
@@ -198,11 +191,11 @@ candle_convert(size = 0)
 
                 let outputs = this.model.predict(this.predict_tensor);
 
-                let predict_value = outputs.dataSync()[0];
+                let predict_value = outputs.dataSync();
 
-                this.last_predict = predict_value;
+                this.last_predict = this.rounding_array(predict_value);
 
-                this.predict_set(predict_value);
+                this.predict_set(this.rounding_array(predict_value));
    
                 await this.sleep(500); // Be sure everything is updated
 
@@ -212,6 +205,26 @@ candle_convert(size = 0)
     sleep(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
+
+    rounding(value,dec = 2)
+        {
+            let coeff = Math.pow(10, dec);
+
+        return Math.round(value * coeff) / coeff;
+        }
+
+    rounding_array(array,dec = 2)
+    {
+            let coeff = Math.pow(10, dec);
+            let new_array = [];
+
+            for (let i = 0; i < array.length; i++)
+            {
+                new_array[i] = Math.round(array[i] * coeff) / coeff;    
+            }
+        
+            return new_array;
+    }     
 
 	async train(input_ts,output_ts,loop){
         for (let i = 0; i < loop; i++) {

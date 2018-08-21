@@ -4,13 +4,8 @@
 
   const low = require('lowdb');
   const FileSync = require('lowdb/adapters/FileSync');
-  const adapter = new FileSync('db.json')
-  const db = low(adapter)
-
-  ai_trader = {};
-  ai_trader.btc = [];
-  ai_trader.datasetlimit = 2000;
-  ai_trader.update = 0;
+  const adapter = new FileSync('db.json');
+  const db = low(adapter);
 
   class BINANCE_API{
 

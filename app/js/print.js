@@ -20,6 +20,24 @@ function new_action (pred,real)
     $('.actions').prepend('<h1>Buy/Sell Pred:'+Math.round(pred * 100) / 100+' Real:'+Math.round(real * 100) / 100+'</h1>');
 }
 
+function log_print(array)
+{
+    let content = "";
+
+    for (let i = 0; i < array.length; i++) {
+        
+        content += array[i].toString()+"<br>";
+    }
+    
+    
+    $('.loggs').html(content);
+    //arr.toString();
+
+
+
+}
+
+
 
 
 function next_predict (predict)
@@ -27,7 +45,7 @@ function next_predict (predict)
     if(predict == 0)
         return;
 
-    $('.next-predict').html(Math.round(predict * 100) / 100);
+    $('.next-predict').html('C: '+Math.round(predict[0] * 100) / 100+'H: '+Math.round(predict[1] * 100) / 100+'L: '+Math.round(predict[2] * 100) / 100);
 }
 
 function last_realprice (realprice)
@@ -46,11 +64,9 @@ function live_fields (time,price)
 
 function clean_orders ()
 {
-
     binance.cancelOrders("BTCUSDT", (error, response, symbol) => {
         console.log(symbol+" cancel response:", response);
       });
-
 }
 
 
